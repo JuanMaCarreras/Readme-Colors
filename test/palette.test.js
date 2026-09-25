@@ -82,4 +82,28 @@ describe('GET /palette', () => {
 
     expect(response.statusCode).toBe(200)
   })
+
+  test('generates a vertical palette', async () => {
+    const response = await request(app).get('/palette').query({
+      c: 'ff0000,00ff00,0000ff',
+      direction: 'vertical'
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toContain('width="80"')
+    expect(response.body).toContain('height="400"')
+  })
+
+  test('rejects an invalid direction', async () => {
+    const response = await request(app).get('/palette').query({
+      c: 'ff0000,00ff00',
+      direction: 'diagonal'
+    })
+
+    expect(response.statusCode).toBe(400)
+
+    expect(response.body).toEqual({
+      error: 'Invalid direction. Use horizontal or vertical'
+    })
+  })
 })
