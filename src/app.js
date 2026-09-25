@@ -1,15 +1,25 @@
 import express from 'express'
+import nodemon from 'nodemon'
 import generateSVG from './service/svg.js'
+import config from './config.js'
 import { isValidHex, normalizeHex } from './utils/color.js'
 
 const app = express()
 
+app.use(express.json())
+
 app.get('/palette', (req, res) => {
-  const { c } = req.query
+  const { c, direction = 'horizontal' } = req.query
 
   if (!c) {
     return res.status(400).json({
       error: 'Missing colors'
+    })
+  }
+
+  if (!['horizontal', 'vertical'].includes(direction)) {
+    return res.status(400).json({
+      error: 'Invalid direction. Use horizontal or vertical'
     })
   }
 
@@ -21,9 +31,9 @@ app.get('/palette', (req, res) => {
     })
   }
 
-  if (colors.length > 12) {
+  if (colors.length > config.palette.maxColors) {
     return res.status(400).json({
-      error: 'The palette must contain between 1 and 12 colors'
+      error: `The palette must contain between 1 and ${config.palette.maxColors} colors`
     })
   }
 
@@ -38,7 +48,7 @@ app.get('/palette', (req, res) => {
 
   const normalizedColors = colors.map(normalizeHex)
 
-  const svg = generateSVG(normalizedColors)
+  const svg = generateSVG(normalizedColors, direction)
 
   res.type('image/svg+xml')
   res.send(svg)
