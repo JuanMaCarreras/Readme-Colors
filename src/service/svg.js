@@ -1,15 +1,36 @@
-const generateSVG = colors => {
-  const width = 400
-  const height = 80
-  const colorWidth = width / colors.length
+import config from '../config.js'
+
+const generateSVG = (colors, direction = 'horizontal') => {
+  let width = config.palette.width
+  let height = config.palette.height
+
+  if (direction === 'vertical') {
+    ;[width, height] = [height, width]
+  }
+
+  const colorSize =
+    direction === 'horizontal' ? width / colors.length : height / colors.length
 
   const rects = colors
     .map((color, index) => {
+      if (direction === 'horizontal') {
+        return `
+          <rect
+            x="${index * colorSize}"
+            y="0"
+            width="${colorSize}"
+            height="${height}"
+            fill="#${color}"
+          />
+        `
+      }
+
       return `
         <rect
-          x="${index * colorWidth}"
-          width="${colorWidth}"
-          height="${height}"
+          x="0"
+          y="${index * colorSize}"
+          width="${width}"
+          height="${colorSize}"
           fill="#${color}"
         />
       `
